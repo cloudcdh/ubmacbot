@@ -1,0 +1,51 @@
+name: MirrorBot CI on Ubuntu
+
+on:
+  workflow_dispatch:
+
+env:
+  GitHubMail: ${{ secrets.GitHubMail }}
+  GitHubName: ${{ secrets.GitHubName }}
+  BotRepoSlug: ${{ secrets.MIRROR_REPOSLUG }}
+  ConfigSlug: ${{ secrets.ConfigSlug }}
+  CredsSlug: ${{ secrets.CredsSlug }}
+  PickleSlug: ${{ secrets.PickleSlug }}
+  BotName: Zbot
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Cache Git Credentials"
+        run: |
+          git config --global user.email ${GitHubMail}
+          git config --global user.name ${GitHubName}
+          git config --global credential.helper store
+          echo "https://${GitHubName}:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+      - name: Cleanup The Actions Workspace
+        uses: rokibhasansagar/slimhub_actions@main
+      - name: Clone And Prepare The Mirror Repository
+        run: |
+          cd /home/runner
+          git clone https://${{ secrets.GH_TOKEN }}@github.com/${BotRepoSlug} --depth 1 botSource
+          cd /home/runner/botSource
+          curl -sL ${ConfigSlug} -o config.env
+          curl -sL ${CredsSlug} -o credentials.json
+          curl -sL ${PickleSlug} | base64 --decode >> token.pickle
+      - name: Compile The Mirroring Docker Container
+        run: |
+          cd /home/runner/botSource
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin &>/dev/null
+          docker build . --rm --force-rm --compress --no-cache=true --pull --file Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
+          docker image ls
+          docker push ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
+      - name: Run The Mirroring Docker Container
+        continue-on-error: true
+        timeout-minutes: 320
+        run: |
+          cd /home/runner/botSource
+          docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
+      - name: Trigger The Looper
+        run: |
+          curl -X POST --header "Authorization: token ${{ secrets.GH_TOKEN }}" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/main.yml/dispatches -d '{"ref":"main"}'
