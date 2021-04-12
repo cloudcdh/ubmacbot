@@ -46,5 +46,6 @@ jobs:
           cd /home/runner/botSource
           docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
       - name: Trigger The Looper
+        continue-on-error: true
         run: |
           curl -X POST --header "Authorization: token ${{ secrets.GH_TOKEN }}" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/main.yml/dispatches -d '{"ref":"main"}'
