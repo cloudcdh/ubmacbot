@@ -42,9 +42,9 @@ After that, I had to add some info for the [workflow file](.github/workflows/mai
 
 1. The MirrorBot script directory will be `/home/runner/botSource`
 2. The workflow will be triggered only on workflow_dispatch.
-3. The workflow will cleanup the workspace which takes 6 to 12 minutes, according to server pressure.
-After that, when the bot starts, it will run for exactly 320 minutes, then automatically trigger another dispatch.
-4. So you will get an infinite loop of run with maximum 15 minutes of bot downtime.
+3. When the bot starts, it will run for exactly 340 minutes, then automatically trigger another dispatch.
+4. The workflow will cleanup the workspace in background, so you will have to wait for 6 to 12 minutes on bot start to get full space.
+5. So you will get an infinite loop of run with maximum 15 minutes of bot downtime.
 
 ## Disclaimer
 
