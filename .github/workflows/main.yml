@@ -42,9 +42,9 @@ jobs:
         continue-on-error: true
         timeout-minutes: 340
         run: |
-          curl -sL https://github.com/rokibhasansagar/slimhub_actions/raw/main/cleanup.sh | bash &>/dev/null & disown
           cd /home/runner/botSource
-          docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
+          docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName} &
+          curl -sL https://github.com/rokibhasansagar/slimhub_actions/raw/main/cleanup.sh | bash &>/dev/null
       - name: Trigger The Looper
         continue-on-error: true
         run: |
