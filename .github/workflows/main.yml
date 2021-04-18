@@ -6,7 +6,7 @@ on:
 env:
   GitHubMail: ${{ secrets.GitHubMail }}
   GitHubName: ${{ secrets.GitHubName }}
-  BotRepoSlug: ${{ secrets.MIRROR_REPOSLUG }}
+  BotRepoSlug: ${{ secrets.BotRepoSlug }}
   ConfigSlug: ${{ secrets.ConfigSlug }}
   CredsSlug: ${{ secrets.CredsSlug }}
   PickleSlug: ${{ secrets.PickleSlug }}
