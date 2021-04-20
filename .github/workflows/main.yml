@@ -44,14 +44,10 @@ jobs:
           docker image ls
           docker push ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
            set +xv
-      - name: Run The Mirroring Docker Container w/ Background Cleanup
+      - name: Loop Workflow
         continue-on-error: true
         timeout-minutes: 340
         run: |
           cd /home/runner/botSource
           docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName} &
-          curl -sL https://github.com/rokibhasansagar/slimhub_actions/raw/main/cleanup.sh | bash &>/dev/null
-      - name: Trigger The Looper
-        continue-on-error: true
-        run: |
           curl -X POST --header "Authorization: token ${{ secrets.GH_TOKEN }}" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/main.yml/dispatches -d '{"ref":"main"}'
