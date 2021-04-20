@@ -31,9 +31,9 @@ jobs:
           cd /home/runner
           git clone https://${{ secrets.GH_TOKEN }}@github.com/${BotRepoSlug} --depth 1 botSource
           cd /home/runner/botSource
-          curl -sL ${ConfigSlug} -o config.env
-          curl -sL ${CredsSlug} -o credentials.json
-          curl -sL ${PickleSlug} -o token.pickle
+          curl -sL ${ConfigSlug}
+          curl -sL ${CredsSlug}
+          curl -sL ${PickleSlug}
           set +xv
       - name: Compile The Mirroring Docker Container
         run: |
