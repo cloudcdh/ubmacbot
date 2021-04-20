@@ -24,30 +24,31 @@ jobs:
           git config --global user.name ${GitHubName}
           git config --global credential.helper store
           echo "https://${GitHubName}:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
-          set +xv
+        
       - name: Clone And Prepare The Mirror Repository
         run: |
-          set -xv
           cd /home/runner
           git clone https://${{ secrets.GH_TOKEN }}@github.com/${BotRepoSlug} --depth 1 botSource
           cd /home/runner/botSource
           curl -sL ${ConfigSlug} -o config.env
           curl -sL ${CredsSlug} -o credentials.json
           curl -sL ${PickleSlug} -o token.pickle
-          set +xv
+          
       - name: Compile The Mirroring Docker Container
         run: |
-          set -xv
+          
           cd /home/runner/botSource
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin &>/dev/null
           docker build . --rm --force-rm --compress --no-cache=true --pull --file Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
           docker image ls
           docker push ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
-           set +xv
+          cd /home/runner/botSource
+      - name: running Docker
+        timeout-minutes: 30
+        continue-on-error: true
+        run: |
+          docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName}
       - name: Loop Workflow
         continue-on-error: true
-        timeout-minutes: 340
         run: |
-          cd /home/runner/botSource
-          docker run --privileged --rm -i ${{ secrets.DOCKER_USERNAME }}/mirror-bot:${BotName} &
           curl -X POST --header "Authorization: token ${{ secrets.GH_TOKEN }}" https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/main.yml/dispatches -d '{"ref":"main"}'
