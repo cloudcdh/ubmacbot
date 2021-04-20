@@ -30,7 +30,7 @@ jobs:
           cd /home/runner/botSource
           curl -sL ${ConfigSlug} -o config.env
           curl -sL ${CredsSlug} -o credentials.json
-          curl -sL ${PickleSlug} | base64 --decode >> token.pickle
+          curl -sL ${PickleSlug} -o token.pickle
       - name: Compile The Mirroring Docker Container
         run: |
           cd /home/runner/botSource
